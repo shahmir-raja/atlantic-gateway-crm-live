@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlantic Gateway CRM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background-color: #0f172a; color: white; height: 100vh; }
+        .container { display: flex; height: 100vh; }
+        .sidebar { width: 250px; background-color: #1e293b; border-right: 1px solid #334155; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { margin-bottom: 30px; }
+        .nav { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .nav button { padding: 12px; background-color: transparent; color: white; border: none; border-radius: 4px; cursor: pointer; text-align: left; }
+        .nav button.active { background-color: #2563eb; }
+        .logout-btn { padding: 12px; background-color: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background-color: #1e293b; border-bottom: 1px solid #334155; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 28px; }
+        .content { flex: 1; padding: 30px; overflow: auto; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .card { background-color: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155; }
+        .card p:first-child { color: #94a3b8; margin-bottom: 10px; }
+        .card p:last-child { font-size: 32px; font-weight: bold; }
+        .login-container { min-height: 100vh; background-color: #0f172a; display: flex; justify-content: center; align-items: center; }
+        .login-box { background-color: #1e293b; padding: 40px; border-radius: 8px; width: 400px; border: 1px solid #334155; }
+        .login-box h1 { font-size: 28px; text-align: center; margin-bottom: 10px; }
+        .login-box p { color: #94a3b8; text-align: center; margin-bottom: 30px; }
+        .login-box input { width: 100%; padding: 10px; margin-bottom: 15px; background-color: #334155; color: white; border: 1px solid #475569; border-radius: 4px; }
+        .login-box button { width: 100%; padding: 10px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .credentials { margin-top: 20px; padding-top: 20px; border-top: 1px solid #334155; font-size: 12px; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        let currentUser = null;
+        let currentTab = 'dashboard';
+
+        function login(email, password) {
+            if (email === 'admin@atlanticgateway.com' && password === 'admin123') {
+                currentUser = { name: 'Admin User', role: 'admin' };
+                render();
+            } else if (email === 'staff@atlanticgateway.com' && password === 'staff123') {
+                currentUser = { name: 'Staff User', role: 'staff' };
+                render();
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentTab = 'dashboard';
+            render();
+        }
+
+        function setTab(tab) {
+            currentTab = tab;
+            render();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (!currentUser) {
+                app.innerHTML = `
+                    <div class="login-container">
+                        <div class="login-box">
+                            <h1>Atlantic Gateway</h1>
+                            <p>Shipping & Logistics CRM</p>
+                            <input type="email" id="email" placeholder="Email" value="admin@atlanticgateway.com">
+                            <input type="password" id="password" placeholder="Password" value="admin123">
+                            <button onclick="handleLogin()">Login</button>
+                            <div class="credentials">
+                                <p>Admin: admin@atlanticgateway.com / admin123</p>
+                                <p>Staff: staff@atlanticgateway.com / staff123</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            app.innerHTML = `
+                <div class="container">
+                    <div class="sidebar">
+                        <h2>AG CRM</h2>
+                        <div class="nav">
+                            <button onclick="setTab('dashboard')" class="nav-btn ${currentTab === 'dashboard' ? 'active' : ''}">Dashboard</button>
+                            <button onclick="setTab('jobs')" class="nav-btn ${currentTab === 'jobs' ? 'active' : ''}">Jobs</button>
+                            <button onclick="setTab('containers')" class="nav-btn ${currentTab === 'containers' ? 'active' : ''}">Inventory</button>
+                            <button onclick="setTab('customers')" class="nav-btn ${currentTab === 'customers' ? 'active' : ''}">Customers</button>
+                            <button onclick="setTab('leads')" class="nav-btn ${currentTab === 'leads' ? 'active' : ''}">Active Leads</button>
+                            <button onclick="setTab('accounts')" class="nav-btn ${currentTab === 'accounts' ? 'active' : ''}">Accounts</button>
+                        </div>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                    <div class="main">
+                        <div class="header">
+                            <h1>${currentTab}</h1>
+                            <div>
+                                <p style="margin: 0 0 5px 0;">${currentUser.name}</p>
+                                <p style="margin: 0; color: #94a3b8; font-size: 12px;">${currentUser.role}</p>
+                            </div>
+                        </div>
+                        <div class="content">
+                            ${renderTab()}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Update nav button styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.style.backgroundColor = btn.classList.contains('active') ? '#2563eb' : 'transparent';
+            });
+        }
+
+        function renderTab() {
+            switch(currentTab) {
+                case 'dashboard':
+                    return `
+                        <div class="dashboard-grid">
+                            <div class="card"><p>Total Jobs</p><p>0</p></div>
+                            <div class="card"><p>Containers</p><p>0</p></div>
+                            <div class="card"><p>Customers</p><p>0</p></div>
+                            <div class="card"><p>Active Leads</p><p>0</p></div>
+                        </div>
+                    `;
+                case 'jobs':
+                    return '<p style="color: #94a3b8;">Job tracking coming soon...</p>';
+                case 'containers':
+                    return '<p style="color: #94a3b8;">Container inventory coming soon...</p>';
+                case 'customers':
+                    return '<p style="color: #94a3b8;">Customer management coming soon...</p>';
+                case 'leads':
+                    return '<p style="color: #94a3b8;">Lead tracking coming soon...</p>';
+                case 'accounts':
+                    return '<p style="color: #94a3b8;">Account management coming soon...</p>';
+                default:
+                    return '';
+            }
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            login(email, password);
+        }
+
+        render();
+    </script>
+</body>
+</html>
