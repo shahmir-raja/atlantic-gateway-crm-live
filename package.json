@@ -1,11 +1,5 @@
 {
   "name": "atlantic-gateway-crm-live",
   "version": "1.0.0",
-  "description": "Atlantic Gateway CRM",
-  "private": true,
-  "dependencies": {},
-  "scripts": {
-    "start": "echo 'Server running'",
-    "build": "echo 'Build complete'"
-  }
+  "private": true
 }
